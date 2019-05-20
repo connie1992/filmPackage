@@ -1,0 +1,3 @@
+<!--miniPrograme/pages/auth/index.wxml.wxml-->
+
+<button open-type="getUserInfo" bindgetuserinfo="getUserInfo">授权</button>

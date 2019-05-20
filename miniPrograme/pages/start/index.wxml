@@ -1,0 +1,1 @@
+<button open-type="getUserInfo" bindgetuserinfo="getUserInfo">然后呢，一起走吧</button>

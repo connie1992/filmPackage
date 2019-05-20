@@ -1,0 +1,35 @@
+<!--index.wxml-->
+<view class="container" style='padding: 10px {{padding}}px'>
+  <!-- 电影名称、时间、电影院 -->
+  <view class='movieInfo'>
+    <view class="movieName">人生无限公司</view>
+    <view class='movieTime'>5月26日 12:30 英皇电影城（东海缤纷店）</view>
+  </view>
+  <movable-area class="area" scale-area="{{false}}" style="width: 100%; height: {{areaHeight}}px">
+    <movable-view scale direction="all" scale-min="1" scale-max="3" bind:scale="seatScale" bind:change="seatChange"
+      class='seat'>
+      <view class="item" wx:for="{{seatMap}}" wx:key="id" wx:for-item="seat"
+        style="top:{{seat.y * seatItemHeight}}px;left:{{seat.x * seatItemWidth}}px;width:{{seatItemWidth}}px;height:{{seatItemHeight}}px;">
+        <image src="{{seat.iconUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px' data-id="{{seat._id}}"
+          data-index="{{seat.index}}" data-seat="{{seat.seat}}" data-sold="{{seat.sold}}" bind:tap="select"></image>
+      </view>
+    </movable-view>
+  </movable-area>
+  <view class="footer">
+    <view class='legend'>
+      <view class='item'><image src="{{availableUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px;margin-right:5px'></image>可选 </view>
+      <view class='item'><image src="{{soldUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px;margin-right:5px'></image>不可选</view>
+      <view class='item'><image src="{{selectUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px;margin-right:5px'></image>已选</view>
+    </view>
+    <view class='phoneInfo'>
+      <view style='width:100%'>您现在使用的号码：156265264468 <image src="./edit.png" style='width:17px;height:17px;margin-left:8px;'></image></view>
+      <view>可以选择2个座位</view>
+    </view>
+    <view class='selectInfo'>
+      已选：A-1 A-2
+    </view>
+    <view class='submit'>
+      <button type='primary' size="mini">确定</button>
+    </view>
+  </view>
+</view>
