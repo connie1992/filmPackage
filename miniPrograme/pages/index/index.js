@@ -34,7 +34,7 @@ Page({
     // 手机号弹窗
     phone: [],
     show: false,
-    newPhone: '',
+    newPhone: '123',
     sms: '',
     smsErrorMsg: ''
   },
@@ -82,6 +82,16 @@ Page({
   addPhone() {
     this.setData({newPhone: '', sms: '', show: true});
   },
+  // 刪除手机号
+  deletePhone(event) {
+    let index = event.currentTarget.dataset.index;
+    let phoneArr = this.data.phone;
+    phoneArr.splice(index, 1);
+    for (let i = index; i < phoneArr.length; i++) {
+      phoneArr[i].index = index++;
+    }
+    this.setData({phone: phoneArr}); 
+  },
   newPhoneChange(event) {
     this.setData({newPhone: event.detail});
   },
@@ -98,22 +108,31 @@ Page({
   confirm() {
     let result = zhenzisms.client.validateCode('15625264468', this.data.sms);
     console.log('验证码校验的结果为:' + result);
+    // result = 'ok';
     if (result == 'ok') {
       this.setData({smsErrorMsg: ''});
       let phoneArr = this.data.phone;
       phoneArr.push({index: phoneArr.length, text: this.data.newPhone});
       this.setData({phone: phoneArr, show: false}); 
-      console.log(this.data.phone);
     } else if (result == 'code_expired') {
+      console.log('过期');
       // 验证码过期
       this.setData({smsErrorMsg: '验证码过期'});
     } else {
+      console.log('错误');
       // 验证码错误
       this.setData({smsErrorMsg: '验证码错误'});
     }
-    
-    
   },
+  // 根据手机号获取可以选择的座位数量
+
+
+  // 刷新座位选择情况，返回已经选择的座位坐标
+
+
+  // 选择座位
+
+
   onLoad: function(options) {
       let _this = this;
       // 选座区域的宽高

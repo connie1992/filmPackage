@@ -32,18 +32,17 @@
         </view>
       </view>
       <view class='phoneInfo'>
-        <view class="phone">
-          <view>您现在使用的号码：</view>
-          <view class="">
-          <view wx:for="{{phone}}" wx:key="index" wx:for-item="item" style="display:flex">
-            {{item.text}}
-            <color-icon size="18" url="../../images/delete.png" bind:tap="deletePhone"></color-icon>
+        <view style="display:flex;width:100%;padding:2px 0">
+          <view style="flex-shrink:0">您现在使用的号码：</view>
+          <view style="flex:1;display:flex;justify-content: flex-start;flex-wrap:wrap">
+            <view wx:for="{{phone}}" wx:key="index" wx:for-item="item" style="display:flex">
+              {{item.text}}
+              <color-icon size="16" url="../../images/delete.png" data-index="{{item.index}}" bind:tap="deletePhone"></color-icon>
+            </view>
+            <color-icon size="18" url="../../images/add-file.png" bind:tap="addPhone"></color-icon>
           </view>
-          <color-icon size="18" url="../../images/add-file.png" bind:tap="addPhone"></color-icon>
-          </view>
-          
         </view>
-        <view>可以选择2个座位</view>
+        <view style="padding:2px 0">可以选择2个座位</view>
       </view>
       <view class='selectInfo'>已选：A-1 A-2</view>
       <view class='submit'>
@@ -53,7 +52,7 @@
     <!-- 添加手机号弹窗 -->
     <van-dialog use-slot show="{{ show }}" confirm-close="{{false}}" show-cancel-button="{{true}}" title="添加手机号" bind:confirm="confirm">
       <view class="input-phone">
-        <van-field style="width: 100%" value="{{newPhone}}" titleWidth="80px" required clearable value="" label="手机号" placeholder="请输入报名登记的手机号" bind:change="newPhoneChange" />
+        <van-field style="width: 100%" value="{{newPhone}}" titleWidth="80px" required clearable label="手机号" placeholder="请输入报名登记的手机号" bind:change="newPhoneChange" />
         <van-field value="{{ sms }}" titleWidth="80px" required clearable label="短信验证码" placeholder="请输入短信验证码" error-message="{{smsErrorMsg}}" border="{{ false }}" use-button-slot bind:change="smsChange">
           <van-button slot="button" size="small" type="primary" bind:tap="sendVerifyCode">
             发送验证码

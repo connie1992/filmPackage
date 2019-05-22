@@ -49,7 +49,7 @@
   flex-wrap: wrap;
   align-content: flex-end;
   box-sizing: border-box;
-  padding-bottom: 20px;
+  padding-bottom: 30rpx;
   height: 170px;
 }
 
@@ -71,10 +71,6 @@
 
 .footer .phoneInfo {
   width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  /* height: 50px; */
-  align-items: center;
 }
 
 .footer .phoneInfo .phone {
