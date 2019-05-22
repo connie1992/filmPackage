@@ -52,10 +52,10 @@
     <!-- 添加手机号弹窗 -->
     <van-dialog use-slot show="{{ show }}" confirm-close="{{false}}" show-cancel-button="{{true}}" title="添加手机号" bind:confirm="confirm">
       <view class="input-phone">
-        <van-field style="width: 100%" value="{{newPhone}}" titleWidth="80px" required clearable label="手机号" placeholder="请输入报名登记的手机号" bind:change="newPhoneChange" />
-        <van-field value="{{ sms }}" titleWidth="80px" required clearable label="短信验证码" placeholder="请输入短信验证码" error-message="{{smsErrorMsg}}" border="{{ false }}" use-button-slot bind:change="smsChange">
-          <van-button slot="button" size="small" type="primary" bind:tap="sendVerifyCode">
-            发送验证码
+        <van-field value="{{newPhone}}" titleWidth="80px" required label="手机号" placeholder="请输入报名登记的手机号" error-message="{{phoneErrorMsg}}" bind:change="newPhoneChange" />
+        <van-field value="{{ sms }}" titleWidth="80px" required label="短信验证码" placeholder="请输入短信验证码" error-message="{{smsErrorMsg}}" border="{{ false }}" use-button-slot bind:change="smsChange">
+          <van-button slot="button" size="small" type="primary" disabled='{{smsDisabled}}' bind:tap="sendVerifyCode">
+            {{smsBtnText}}
           </van-button>
         </van-field>
       </view>

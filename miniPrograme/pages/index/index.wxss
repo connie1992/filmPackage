@@ -103,7 +103,7 @@
 }
 
 .container .input-phone {
-  padding: 10px 0px;
+  /* margin-top: 10px; */
 }
 
 .container .input-phone-btn {

@@ -5,6 +5,8 @@ let appSecret = '3e0e9d1f-b327-452e-9163-96ba89f4ac0c';
 zhenzisms.client.init(apiUrl, appId, appSecret);
 const app = getApp();
 wx.cloud.init();
+let count = 30;
+let interval = 0;
 Page({
 
   /**
@@ -34,9 +36,13 @@ Page({
     // 手机号弹窗
     phone: [],
     show: false,
-    newPhone: '123',
+    newPhone: '',
+    phoneErrorMsg: '',
     sms: '',
-    smsErrorMsg: ''
+    smsErrorMsg: '',
+    smsDisabled: false,
+    smsBtnText: '发送验证码',
+  
   },
   // 座位区域放大缩小时
   seatScale(event) {
@@ -80,7 +86,8 @@ Page({
   },
   // 添加手机号
   addPhone() {
-    this.setData({newPhone: '', sms: '', show: true});
+    clearInterval(interval);
+    this.setData({smsDisabled: false, smsBtnText: '发送验证码', newPhone: '', sms: '', smsErrorMsg: '', phoneErrorMsg: '', show: true});
   },
   // 刪除手机号
   deletePhone(event) {
@@ -95,34 +102,53 @@ Page({
   newPhoneChange(event) {
     this.setData({newPhone: event.detail});
   },
+  // 验证码输入
   smsChange(event) {
     this.setData({sms: event.detail});
   },
   // 发送验证码
   sendVerifyCode() {
-    this.setData({smsErrorMsg: ''});
-    zhenzisms.client.sendCode(function(res){
-      console.log(res.data);
-    }, '15625264468', '小五提示您~ 验证码为：{code}', '1234567890', 600, 4);
+    // 校验手机号是否是正确的格式
+    let rexp = /^1\d{10}$/;
+    if (!rexp.test(this.data.newPhone)) {
+      this.setData({phoneErrorMsg: '请输入正确格式的手机号'});
+    } else {
+      this.setData({ phoneErrorMsg: '', smsErrorMsg: '' });
+      let _this = this;
+      console.log(`----${this.data.newPhone} 发送验证码-----`);
+      zhenzisms.client.sendCode(function (res) {
+        // 发送成功
+        _this.setData({ smsDisabled: true });
+        count = 30;
+        interval = setInterval(() => {
+          _this.setData({ smsBtnText: `${count--}秒` });
+          if (count == 0) {
+            _this.setData({ smsDisabled: false, smsBtnText: '发送验证码' });
+            clearInterval(interval);
+          }
+        }, 1000);
+      }, this.data.newPhone, '小五提示您~ 验证码为：{code}', '', 600, 4);
+    }
   },
   confirm() {
-    let result = zhenzisms.client.validateCode('15625264468', this.data.sms);
-    console.log('验证码校验的结果为:' + result);
-    // result = 'ok';
-    if (result == 'ok') {
-      this.setData({smsErrorMsg: ''});
-      let phoneArr = this.data.phone;
-      phoneArr.push({index: phoneArr.length, text: this.data.newPhone});
-      this.setData({phone: phoneArr, show: false}); 
-    } else if (result == 'code_expired') {
-      console.log('过期');
-      // 验证码过期
-      this.setData({smsErrorMsg: '验证码过期'});
+    if (this.data.sms == '') {
+      this.setData({ smsErrorMsg: '请输入验证码' });
     } else {
-      console.log('错误');
-      // 验证码错误
-      this.setData({smsErrorMsg: '验证码错误'});
+      let result = zhenzisms.client.validateCode(this.data.newPhone, this.data.sms);
+      if (result == 'ok') {
+        this.setData({ smsErrorMsg: '' });
+        let phoneArr = this.data.phone;
+        phoneArr.push({ index: phoneArr.length, text: this.data.newPhone });
+        this.setData({ phone: phoneArr, show: false });
+      } else if (result == 'code_expired') {
+        // 验证码过期
+        this.setData({ smsErrorMsg: '验证码过期' });
+      } else {
+        // 验证码错误
+        this.setData({ smsErrorMsg: '验证码错误' });
+      }
     }
+    
   },
   // 根据手机号获取可以选择的座位数量
 
