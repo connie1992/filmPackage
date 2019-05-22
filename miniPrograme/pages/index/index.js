@@ -1,3 +1,8 @@
+let zhenzisms = require('../../utils/zhenzisms.js');
+let apiUrl = "https://sms_developer.zhenzikj.com";
+let appId = '101584';
+let appSecret = '3e0e9d1f-b327-452e-9163-96ba89f4ac0c';
+zhenzisms.client.init(apiUrl, appId, appSecret);
 const app = getApp();
 wx.cloud.init();
 Page({
@@ -6,23 +11,32 @@ Page({
    * 页面的初始数据
    */
   data: {
+    // 用于计算排号位置
     scale: 1,
     top: 0,
     height: 300,
     originHeight: 300,
-    row: [],
-    col: [],
+    // 座位数据
     seatMap: [],
     seatItemWidth: 0,
     seatItemHeight: 0,
-    availableUrl: './available.png',
+    // 座位状态图片
+    availableUrl: './sofa.png',
     selectUrl: './select.png',
     soldUrl: './sold.png',
     imageSize: 0,
     areaHeight: 0,
     padding: 0,
     userInfo: null,
-    hasUserInfo: false
+    hasUserInfo: false,
+    totalHeight: app.globalData.totalHeight,
+    seatPadding: 5,
+    // 手机号弹窗
+    phone: [],
+    show: false,
+    newPhone: '',
+    sms: '',
+    smsErrorMsg: ''
   },
   // 座位区域放大缩小时
   seatScale(event) {
@@ -64,94 +78,96 @@ Page({
       });
     }
   },
-  // 设置行列信息
-  setSeatParam(rowCount, colCount) {
-    let row = [];
-    for (let i = 0; i < rowCount; i++) {
-      row.push({
-        key: i
-      });
+  // 添加手机号
+  addPhone() {
+    this.setData({newPhone: '', sms: '', show: true});
+  },
+  newPhoneChange(event) {
+    this.setData({newPhone: event.detail});
+  },
+  smsChange(event) {
+    this.setData({sms: event.detail});
+  },
+  // 发送验证码
+  sendVerifyCode() {
+    this.setData({smsErrorMsg: ''});
+    zhenzisms.client.sendCode(function(res){
+      console.log(res.data);
+    }, '15625264468', '小五提示您~ 验证码为：{code}', '1234567890', 600, 4);
+  },
+  confirm() {
+    let result = zhenzisms.client.validateCode('15625264468', this.data.sms);
+    console.log('验证码校验的结果为:' + result);
+    if (result == 'ok') {
+      this.setData({smsErrorMsg: ''});
+      let phoneArr = this.data.phone;
+      phoneArr.push({index: phoneArr.length, text: this.data.newPhone});
+      this.setData({phone: phoneArr, show: false}); 
+      console.log(this.data.phone);
+    } else if (result == 'code_expired') {
+      // 验证码过期
+      this.setData({smsErrorMsg: '验证码过期'});
+    } else {
+      // 验证码错误
+      this.setData({smsErrorMsg: '验证码错误'});
     }
-    let col = [];
-    for (let i = 0; i < colCount; i++) {
-      col.push({
-        key: i
-      });
-    }
-    return {
-      row,
-      col
-    };
+    
+    
   },
   onLoad: function(options) {
-    // 判断是否已经获取授权
-    // if (app.globalData.userInfo == null) {
-    //   // 跳转授权
-    //   wx.redirectTo({
-    //     url: '../auth/index',
-    //   });
-    // } else {
       let _this = this;
       // 选座区域的宽高
       let res1 = wx.getSystemInfoSync();
       let padding = res1.windowWidth > 400 ? 25 : 20;
       let areaWidth = res1.windowWidth - padding * 2;
-      let areaHeight = res1.windowHeight - 20 - 60 - 170;
+      let areaHeight = res1.windowHeight - app.globalData.statusBarHeight - app.globalData.toolbarHeight - 20 - 60 - 170;
       if (areaHeight > areaWidth * 1.5) {
         areaHeight = areaWidth * 1.5;
       }
       this.setData({
         padding,
-        areaHeight,
-        userInfo: app.globalData.userInfo,
-        hasUserInfo: true
+        areaHeight
       });
-      // 云函数测试
-      wx.cloud.callFunction({
-        // 云函数名称
-        name: 'getSeatParam'
-      }).then(res => {
-        // console.log(res);
-        // 行列数据
-        let seatParam = res.result.seatParam;
-        let rowCount = seatParam.rowCount;
-        let colCount = seatParam.colCount;
-        let seatParamObj = _this.setSeatParam();
+      // // 云函数测试
+      // wx.cloud.callFunction({
+      //   // 云函数名称
+      //   name: 'getSeatParam'
+      // }).then(res => {
+      //   // console.log(res);
+      //   // 行列数据
+      //   let seatParam = res.result.seatParam;
+      //   let rowCount = seatParam.rowCount;
+      //   let colCount = seatParam.colCount;
 
-        // 设置每个座位view的宽高
-        let seatItemWidth = areaWidth / colCount;
-        let seatItemHeight = areaHeight / rowCount;
+      //   // 设置每个座位view的宽高
+      //   let seatItemWidth = (areaWidth - 2 * this.data.seatPadding) / colCount;
+      //   let seatItemHeight = areaHeight / rowCount;
 
-        // 沙发图标的大小
-        let min = seatItemHeight > seatItemWidth ? seatItemWidth : seatItemHeight;
-        let imageSize = 0;
-        if (min > 35) {
-          imageSize = 25;
-        } else if (min < 20) {
-          imageSize = min - 3;
-        } else {
-          imageSize = min - 10;
-        }
+      //   // 沙发图标的大小
+      //   let min = seatItemHeight > seatItemWidth ? seatItemWidth : seatItemHeight;
+      //   let imageSize = 0;
+      //   if (min > 35) {
+      //     imageSize = 25;
+      //   } else if (min < 20) {
+      //     imageSize = min - 3;
+      //   } else {
+      //     imageSize = min - 10;
+      //   }
 
-        // 座位表
-        let seatMap = res.result.seatMap;
-        seatMap.forEach(element => {
-          element.iconUrl = element.sold == 1 ? _this.data.soldUrl : _this.data.availableUrl;
-        });
+      //   // 座位表
+      //   let seatMap = res.result.seatMap;
+      //   seatMap.forEach(element => {
+      //     element.iconUrl = element.sold == 1 ? _this.data.soldUrl : _this.data.availableUrl;
+      //   });
 
-        _this.setData({
-          ...seatParamObj,
-          seatMap,
-          imageSize,
-          seatItemWidth,
-          seatItemHeight,
-          padding
-        });
-      });
-    // }
-
-
-
+      //   _this.setData({
+      //     seatMap,
+      //     imageSize,
+      //     seatItemWidth,
+      //     seatItemHeight,
+      //     padding
+      //   });
+      // });
   },
 
 })

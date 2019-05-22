@@ -1,11 +1,18 @@
 //app.js
 App({
-  onLaunch: function () {
+  onLaunch: function() {
     // 展示本地存储能力
     var logs = wx.getStorageSync('logs') || []
     logs.unshift(Date.now())
     wx.setStorageSync('logs', logs)
-    
+
+    // 设置页面宽高
+    let info = wx.getSystemInfoSync();
+
+    this.globalData.statusBarHeight = info.statusBarHeight;
+    this.globalData.toolbarHeight = info.statusBarHeight * 2 + 3;
+    this.globalData.windowHeight = info.windowHeight - (info.statusBarHeight * 3 + 3);
+    this.globalData.totalHeight = info.windowHeight;
 
     // 登录
     wx.login({
@@ -34,6 +41,10 @@ App({
     })
   },
   globalData: {
-    userInfo: null
+    userInfo: null,
+    statusBarHeight: 0,
+    windowHeight: 0,
+    toolbarHeight: 0,
+    totalHeight: 0
   }
 })

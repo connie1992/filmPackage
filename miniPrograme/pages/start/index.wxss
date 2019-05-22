@@ -1,0 +1,19 @@
+.wraper .btn {
+    position: absolute;
+    bottom: 150rpx;
+    width: 100%;
+}
+
+.wraper .btn .button-hover11 {
+    color: rgba(31, 39, 58, 0.8);
+    background-color: rgba(255,255,255,0.4)
+}
+
+.wraper .btn .desc {
+    color: rgba(255,255,255,0.7);
+    height: 30px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

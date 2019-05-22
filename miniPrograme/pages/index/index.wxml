@@ -1,35 +1,65 @@
-<!--index.wxml-->
-<view class="container" style='padding: 10px {{padding}}px'>
-  <!-- 电影名称、时间、电影院 -->
-  <view class='movieInfo'>
-    <view class="movieName">人生无限公司</view>
-    <view class='movieTime'>5月26日 12:30 英皇电影城（东海缤纷店）</view>
-  </view>
-  <movable-area class="area" scale-area="{{false}}" style="width: 100%; height: {{areaHeight}}px">
-    <movable-view scale direction="all" scale-min="1" scale-max="3" bind:scale="seatScale" bind:change="seatChange"
-      class='seat'>
-      <view class="item" wx:for="{{seatMap}}" wx:key="id" wx:for-item="seat"
-        style="top:{{seat.y * seatItemHeight}}px;left:{{seat.x * seatItemWidth}}px;width:{{seatItemWidth}}px;height:{{seatItemHeight}}px;">
-        <image src="{{seat.iconUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px' data-id="{{seat._id}}"
-          data-index="{{seat.index}}" data-seat="{{seat.seat}}" data-sold="{{seat.sold}}" bind:tap="select"></image>
+<view class="wraper">
+  <image src="../../images/party.jpg" style='position:absolute;height:{{totalHeight}}px;width:100%'></image>
+  <nav-bar show="{{false}}" title=""></nav-bar>
+  <view class="container" style='padding: 10px {{padding}}px;z-index:1000;background-color:rgba(255,255,255,0.7)'>
+    <!-- 电影名称、时间、电影院 -->
+    <view class='movieInfo'>
+      <view class="movieName">人生无限公司</view>
+      <view class='movieTime'>5月26日 12:30 英皇电影城（东海缤纷店）</view>
+    </view>
+    <!-- 座位区域 -->
+    <movable-area class="area" scale-area="{{false}}" style="width: 100%; height: {{areaHeight}}px">
+      <movable-view scale direction="all" scale-min="1" scale-max="3" bind:scale="seatScale" bind:change="seatChange" class='seat'>
+        <view class="item" wx:for="{{seatMap}}" wx:key="id" wx:for-item="seat" style="top:{{seat.y * seatItemHeight}}px;left:{{seat.x * seatItemWidth + seatPadding}}px;width:{{seatItemWidth}}px;height:{{seatItemHeight}}px;">
+          <image src="{{seat.iconUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px' data-id="{{seat._id}}" data-index="{{seat.index}}" data-seat="{{seat.seat}}" data-sold="{{seat.sold}}" bind:tap="select"></image>
+        </view>
+      </movable-view>
+    </movable-area>
+    <!-- 图例和选座信息 -->
+    <view class="footer">
+      <view class='legend'>
+        <view class='item'>
+          <image src="{{availableUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px;margin-right:5px'></image>
+          可选
+        </view>
+        <view class='item'>
+          <image src="{{soldUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px;margin-right:5px'></image>
+          不可选
+        </view>
+        <view class='item'>
+          <image src="{{selectUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px;margin-right:5px'></image>
+          已选
+        </view>
       </view>
-    </movable-view>
-  </movable-area>
-  <view class="footer">
-    <view class='legend'>
-      <view class='item'><image src="{{availableUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px;margin-right:5px'></image>可选 </view>
-      <view class='item'><image src="{{soldUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px;margin-right:5px'></image>不可选</view>
-      <view class='item'><image src="{{selectUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px;margin-right:5px'></image>已选</view>
+      <view class='phoneInfo'>
+        <view class="phone">
+          <view>您现在使用的号码：</view>
+          <view class="">
+          <view wx:for="{{phone}}" wx:key="index" wx:for-item="item" style="display:flex">
+            {{item.text}}
+            <color-icon size="18" url="../../images/delete.png" bind:tap="deletePhone"></color-icon>
+          </view>
+          <color-icon size="18" url="../../images/add-file.png" bind:tap="addPhone"></color-icon>
+          </view>
+          
+        </view>
+        <view>可以选择2个座位</view>
+      </view>
+      <view class='selectInfo'>已选：A-1 A-2</view>
+      <view class='submit'>
+        <button type='primary' size="mini">确定</button>
+      </view>
     </view>
-    <view class='phoneInfo'>
-      <view style='width:100%'>您现在使用的号码：156265264468 <image src="./edit.png" style='width:17px;height:17px;margin-left:8px;'></image></view>
-      <view>可以选择2个座位</view>
-    </view>
-    <view class='selectInfo'>
-      已选：A-1 A-2
-    </view>
-    <view class='submit'>
-      <button type='primary' size="mini">确定</button>
-    </view>
+    <!-- 添加手机号弹窗 -->
+    <van-dialog use-slot show="{{ show }}" confirm-close="{{false}}" show-cancel-button="{{true}}" title="添加手机号" bind:confirm="confirm">
+      <view class="input-phone">
+        <van-field style="width: 100%" value="{{newPhone}}" titleWidth="80px" required clearable value="" label="手机号" placeholder="请输入报名登记的手机号" bind:change="newPhoneChange" />
+        <van-field value="{{ sms }}" titleWidth="80px" required clearable label="短信验证码" placeholder="请输入短信验证码" error-message="{{smsErrorMsg}}" border="{{ false }}" use-button-slot bind:change="smsChange">
+          <van-button slot="button" size="small" type="primary" bind:tap="sendVerifyCode">
+            发送验证码
+          </van-button>
+        </van-field>
+      </view>
+    </van-dialog>
   </view>
 </view>

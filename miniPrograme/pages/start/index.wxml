@@ -1,1 +1,7 @@
-<button open-type="getUserInfo" bindgetuserinfo="getUserInfo">然后呢，一起走吧</button>
+<view class="wraper">
+    <image src="../../images/party.jpg" style='position:absolute;height:{{height}}px;width:100%'></image>
+    <view class="btn">
+        <button open-type="getUserInfo" bindgetuserinfo="getUserInfo" style="width:200px" class="button-hover11">然后呢，一起走吧</button>
+        <!-- <view class="desc" wx:if="{{false}}"><text>点击授权</text></view> -->
+    </view>
+</view>

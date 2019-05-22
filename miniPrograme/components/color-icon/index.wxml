@@ -1,0 +1,4 @@
+<view class="icon-view">
+  <image src="{{url}}" style="width:{{size}}px; height: {{size}}px; margin-top:{{top}}px;margin-right:{{right}}px;margin-left:{{left}}px;margin-bottom:{{bottom}}px;flex-shrink:0" />
+  <text wx:if="{{text != ''}}">{{text}}</text>
+</view>
