@@ -2,9 +2,7 @@
   "pages": [
     "pages/index/index",
     "pages/start/index",
-    
     "pages/auth/index"
-   
   ],
   "window": {
     "backgroundTextStyle": "light",
