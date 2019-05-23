@@ -5,7 +5,8 @@
     "van-field": "../../components/vant/field/index",
     "van-button": "../../components/vant/button/index",
     "van-loading": "../../components/vant/loading/index",
-    "color-icon": "../../components/color-icon/index"
+    "color-icon": "../../components/color-icon/index",
+    "van-toast": "../../components/vant/toast/index"
   },
   "enablePullDownRefresh": true
 }

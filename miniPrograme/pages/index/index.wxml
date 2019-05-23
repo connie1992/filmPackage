@@ -11,7 +11,7 @@
     <movable-area class="area" scale-area="{{false}}" style="width: 100%; height: {{areaHeight}}px">
       <movable-view scale direction="all" scale-min="1" scale-max="3" bind:scale="seatScale" bind:change="seatChange" class='seat'>
         <view class="item" wx:for="{{seatMap}}" wx:key="id" wx:for-item="seat" style="top:{{seat.y * seatItemHeight}}px;left:{{seat.x * seatItemWidth + seatPadding}}px;width:{{seatItemWidth}}px;height:{{seatItemHeight}}px;">
-          <image src="{{seat.iconUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px' data-id="{{seat._id}}" data-index="{{seat.index}}" data-seat="{{seat.seat}}" data-sold="{{seat.sold}}" bind:tap="select"></image>
+          <image src="{{seat.sold == 0 ? availableUrl : (seat.sold == 1 ? soldUrl : selectUrl)}}" style='width:{{imageSize}}px;height:{{imageSize}}px' data-id="{{seat.id}}" data-index="{{seat.index}}" data-seat="{{seat.seat}}" data-sold="{{seat.sold}}" bind:tap="select"></image>
         </view>
       </movable-view>
     </movable-area>
@@ -42,11 +42,11 @@
             <color-icon size="18" url="../../images/add-file.png" bind:tap="addPhone"></color-icon>
           </view>
         </view>
-        <view style="padding:2px 0">可以选择2个座位</view>
+        <view style="padding:2px 0">可以选择{{selectAmount}}个座位</view>
       </view>
       <view class='selectInfo'>已选：A-1 A-2</view>
       <view class='submit'>
-        <button type='primary' size="mini">确定</button>
+        <button type='primary' size="mini" disabled='{{submitDisabled}}' bind:tap="setSelectSeat">确定</button>
       </view>
     </view>
     <!-- 添加手机号弹窗 -->
@@ -60,5 +60,7 @@
         </van-field>
       </view>
     </van-dialog>
+    <!-- 手机号可以选择的座位数量提示 -->
+    <van-toast id="van-toast" />
   </view>
 </view>
