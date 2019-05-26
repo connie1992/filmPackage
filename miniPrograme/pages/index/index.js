@@ -1,9 +1,9 @@
 import Toast from '../../components/vant/toast/toast.js';
 import { formatTime } from '../../utils/util.js';
 let zhenzisms = require('../../utils/zhenzisms.js');
-let apiUrl = "https://sms_developer.zhenzikj.com";
-let appId = '101584';
-let appSecret = '3e0e9d1f-b327-452e-9163-96ba89f4ac0c';
+const apiUrl = "https://sms_developer.zhenzikj.com";
+const appId = '101584';
+const appSecret = '3e0e9d1f-b327-452e-9163-96ba89f4ac0c';
 zhenzisms.client.init(apiUrl, appId, appSecret);
 const app = getApp();
 wx.cloud.init();
@@ -11,7 +11,6 @@ let count = 30;
 let interval = 0;
 // 电影场次的ID
 const movieTimeId = "5ce615d61b9d07166af30504";
-let selectSeat = [];
 Page({
 
   /**
@@ -34,8 +33,6 @@ Page({
     imageSize: 0,
     areaHeight: 0,
     padding: 0,
-    userInfo: null,
-    hasUserInfo: false,
     totalHeight: app.globalData.totalHeight,
     seatPadding: 5,
     // 手机号弹窗
@@ -50,8 +47,8 @@ Page({
     smsBtnText: '发送验证码',
     // 可以选择的座位数量
     selectAmount: 0,
-    submitDisabled: true 
-
+    submitDisabled: true,
+    selectSeat: []
   },
   // 座位区域放大缩小时
   seatScale(event) {
@@ -80,6 +77,7 @@ Page({
   select(event) {
     let item = event.currentTarget.dataset;
     let soldValue = `seatMap[${item.index}].sold`;
+    let selectSeat = this.data.selectSeat;
     if (item.sold == 0) {
       // 选中
       this.setData({
@@ -98,6 +96,8 @@ Page({
         }
       }
     }
+    this.setData({selectSeat});
+    // 设置提交按钮
     if (selectSeat.length > 0 && this.data.submitDisabled) {
       this.setData({submitDisabled: false});
     } else if (selectSeat.length == 0 && !this.data.submitDisabled) {
@@ -190,6 +190,7 @@ Page({
       }
     }
   },
+  // 校验手机号和验证码对不对
   confirm() {
     if (this.data.sms == '') {
       this.setData({
@@ -266,8 +267,10 @@ Page({
   checkSelectSeat() {
 
   },
-  // 选择座位，保存手机号和验证码，并且设置手机号的状态为 已选择
+
+  // 选择座位，提交保存，保存手机号和验证码，并且设置手机号的状态为 已选择
   setSelectSeat(){
+    let selectSeat = this.data.selectSeat;
     if (this.data.phone.length == 0) {
       Toast.fail("请先添加报名手机号码");
     } else if (selectSeat.length < this.data.selectAmount) {
@@ -292,24 +295,16 @@ Page({
         data: params
       }).then(res => {
         wx.hideLoading();
-        if (res.result == 1) {
+        if (res.result) {
           Toast.success("选座成功");
-          _this.refreshSeatSelect();
-        } else if (res.result == 2) {
+        } else { 
           // 占座失败
-        } else {
-          // 后台处理报错
+          Toast.fail("选座失败，请重新选择");
         }
+        _this.refreshSeatSelect();
+        _this.setData({selectSeat: []});
       });
-
-
-
     }
-   
-
-
-
-
   },
   
   // 下拉刷新最新的选座状态
