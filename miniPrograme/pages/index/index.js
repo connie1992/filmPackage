@@ -83,6 +83,7 @@ Page({
       this.setData({
         [soldValue]: 2 
       });
+      item.sold = 2;
       selectSeat.push(item);
     } else if (item.sold == 2) {
       // 取消选中
@@ -244,7 +245,7 @@ Page({
   refreshSeatSelect() {
     let _this = this;
     wx.showLoading();
-    wx.cloud.callFunction({
+    return wx.cloud.callFunction({
       name: 'getSelectSeat',
       data: { movieTimeId }
     }).then(res => {
@@ -308,9 +309,12 @@ Page({
   },
   
   // 下拉刷新最新的选座状态
-
-
-
+  onPullDownRefresh: function () {
+    this.refreshSeatSelect().then(() => {
+      // 处理完成后，终止下拉刷新
+      wx.stopPullDownRefresh()
+    })
+  },
   onLoad: function (options) {
     let _this = this;
     // 选座区域的宽高

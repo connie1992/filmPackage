@@ -44,7 +44,12 @@
         </view>
         <view style="padding:2px 0">可以选择{{selectAmount}}个座位</view>
       </view>
-      <view class='selectInfo'>已选：A-1 A-2</view>
+      <view class='selectInfo'>已选：
+        <view class="selectSeat" wx:for="{{selectSeat}}" wx:key="id" wx:for-item="item" style="display:flex">
+              {{item.seat}}
+              <color-icon size="16" url="../../images/delete.png" data-index="{{item.index}}" data-id="{{item.id}}" data-index="{{item.index}}"  data-sold="{{item.sold}}" bind:tap="select"></color-icon>
+            </view>
+      </view>
       <view class='submit'>
         <button type='primary' size="mini" disabled='{{submitDisabled}}' bind:tap="setSelectSeat">确定</button>
       </view>

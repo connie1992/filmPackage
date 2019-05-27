@@ -55,6 +55,7 @@ function getValue(key) {
     client.get(key, function(err, res) {
       console.log(`锁定结果为：${res}`);
       if (err) {
+        console.log('查询锁定状态失败……');
         reject(false);
       } else {
         if (res) {
@@ -72,7 +73,7 @@ function setValue(key) {
   return new Promise((resolve, reject) => {
     client.set(key, "1", function(err, reply) {
       if (err) {
-        console.log(err);
+        console.log("锁定座位失败！");
         reject(false);
       } else {
         resolve(true);
@@ -123,8 +124,9 @@ async function lockSeat(ids) {
 }
 
 // 数据库操作
-async function dbSet(selectInfo, nickName, time) {
+async function dbSet(selectInfo, nickName, time, movieTimeId) {
   let _ = db.command;
+  // 更新座位情况
   let tasks = selectInfo.reduce((tasks, item) => {
     const promise = db.collection('seat_map').where({
       id: _.in(item.ids)
@@ -139,7 +141,19 @@ async function dbSet(selectInfo, nickName, time) {
     tasks.push(promise);
     return tasks;
   }, []);
-  return await Promise.all(tasks).catch(e => {
+  // 更新手机选座
+  let phoneTasks = selectInfo.reduce((tasks, item) => {
+    const promise = db.collection('sign_user').where({
+      "movie_time_id": movieTimeId,
+      phone: item.phone
+    }).update({
+      data: {
+        "is_select": 1
+      }
+    });
+    tasks.push(promise);
+  }, []);
+  return await Promise.all(tasks.concat(phoneTasks)).catch(e => {
     console.log(e);
     return false
   });
@@ -150,7 +164,8 @@ exports.main = async(event, context) => {
   let {
     selectInfo,
     nickName,
-    time
+    time,
+    movieTimeId
   } = event;
   let ids = selectInfo.reduce((idArr, item) => {
     return idArr.concat(item.ids)
@@ -179,7 +194,7 @@ exports.main = async(event, context) => {
   delKey(LOCK);
   if (success) {
     // 执行数据库操作
-    let res = await dbSet(selectInfo, nickName, time);
+    let res = await dbSet(selectInfo, nickName, time, movieTimeId);
     console.log('数据库更新成功');
     console.log(res);
   }
