@@ -266,7 +266,61 @@ Page({
 
   // 判断选择的座位是否是相连的
   checkSelectSeat() {
+    let selectSeat = this.data.selectSeat;
+    let seatMap = this.data.seatMap;
 
+    let isOk = true;
+    for (let i = 0; i < selectSeat.length; i++) {
+      let seat = selectSeat[i];
+      let start = seat.x;
+      let end = seat.x;
+      let count = 1;
+      for (let j = i + 1; j < selectSeat.length; j++) {
+        if (!selectSeat[j].check && selectSeat[j].y == seat.y) {
+          selectSeat[j].check = true;
+          if (selectSeat[j].x < start) {
+            start = selectSeat[j].x;
+          } else if (selectSeat[j].x > end) {
+            end = selectSeat[j];
+          }
+          count ++;
+        }
+      }
+      // 结合座位图进行判断
+      
+      // 获取这一行已选择的座位范围
+      let selectStart = -1;
+      let selectEnd = -1;
+      for (let i = 0 ; i < seatMap.length; i++) {
+        if (seatMap[i].y == seat.y && seatMap[i].sold == 1) {
+          if (selectStart == -1) {
+            selectStart = seatMap[i].x;
+          } else {
+            selectEnd = seatMap[i].x;
+          }
+        } else if (seatMap[i].y > seat.y) {
+          break;
+        }
+      }
+      selectEnd = selectEnd == -1 ? selectStart : -1;
+      if (selectStart == -1 && selectEnd == -1) {
+        // 这一行还没有人选择
+        isOk = (count - 1) == (end - start);
+      } else if (start < selectStart && end > selectEnd) {
+        // 选择的座位在已选择的两边： 如：22112
+        isOk = (start + count + (selectEnd - selectStart + 1) - 1) == end;
+      } else if (start > selectEnd) {
+        // 选择的座位在已选择的右边 如： 0001122
+        isOk = start == selectEnd + 1 && (count - 1) == (end - start);
+      }  else {
+        // 选择的座位在已选择的右边 如： 02210000
+        isOk = end + 1 == selectStart && (count - 1) == (end - start);
+      }
+      if (!isOk) {
+        break ;
+      }
+    }
+    return isOk;    
   },
 
   // 选择座位，提交保存，保存手机号和验证码，并且设置手机号的状态为 已选择
@@ -277,6 +331,10 @@ Page({
     } else if (selectSeat.length < this.data.selectAmount) {
       Toast.fail(`您可选择${this.data.selectAmount}个座位，目前只选择了${selectSeat.length}个`);
     } else {
+      if (!this.checkSelectSeat()) {
+        Toast.fail("请选择相连座位");
+        return ;
+      }
       let userInfo = wx.getStorageSync("userInfo");
       // 按照组合选座的情况去拆分座位
       let index = 0;
@@ -298,6 +356,7 @@ Page({
         wx.hideLoading();
         if (res.result) {
           Toast.success("选座成功");
+          this.setData({selectAmount: 0});
         } else { 
           // 占座失败
           Toast.fail("选座失败，请重新选择");

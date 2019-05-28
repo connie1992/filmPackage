@@ -11,7 +11,7 @@
     <movable-area class="area" scale-area="{{false}}" style="width: 100%; height: {{areaHeight}}px">
       <movable-view scale direction="all" scale-min="1" scale-max="3" bind:scale="seatScale" bind:change="seatChange" class='seat'>
         <view class="item" wx:for="{{seatMap}}" wx:key="id" wx:for-item="seat" style="top:{{seat.y * seatItemHeight}}px;left:{{seat.x * seatItemWidth + seatPadding}}px;width:{{seatItemWidth}}px;height:{{seatItemHeight}}px;">
-          <image src="{{seat.sold == 0 ? availableUrl : (seat.sold == 1 ? soldUrl : selectUrl)}}" style='width:{{imageSize}}px;height:{{imageSize}}px' data-id="{{seat.id}}" data-index="{{seat.index}}" data-seat="{{seat.seat}}" data-sold="{{seat.sold}}" bind:tap="select"></image>
+          <image src="{{seat.sold == 0 ? availableUrl : (seat.sold == 1 ? soldUrl : selectUrl)}}" style='width:{{imageSize}}px;height:{{imageSize}}px' data-id="{{seat.id}}" data-index="{{seat.index}}" data-x="{{seat.x}}" data-y="{{seat.y}}" data-seat="{{seat.seat}}" data-sold="{{seat.sold}}" bind:tap="select"></image>
         </view>
       </movable-view>
     </movable-area>

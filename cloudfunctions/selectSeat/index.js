@@ -9,8 +9,11 @@ const LOCK = "lock";
 
 // 初始化连接redis
 const redis = require('redis');
-const client = redis.createClient(18868, 'redis-18868.c1.asia-northeast1-1.gce.cloud.redislabs.com', {
-  password: "Chg85857187."
+// const client = redis.createClient(18868, 'redis-18868.c1.asia-northeast1-1.gce.cloud.redislabs.com', {
+//   password: "Chg85857187."
+// });
+const client = redis.createClient(6379, '106.52.125.131', {
+  password: "12345"
 });
 
 // 尝试锁定
@@ -191,12 +194,12 @@ exports.main = async(event, context) => {
   // success = true;
 
 
-  delKey(LOCK);
-  if (success) {
-    // 执行数据库操作
-    let res = await dbSet(selectInfo, nickName, time, movieTimeId);
-    console.log('数据库更新成功');
-    console.log(res);
-  }
+  // delKey(LOCK);
+  // if (success) {
+  //   // 执行数据库操作
+  //   let res = await dbSet(selectInfo, nickName, time, movieTimeId);
+  //   console.log('数据库更新成功');
+  //   console.log(res);
+  // }
   return success;
 }
