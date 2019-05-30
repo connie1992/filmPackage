@@ -8,10 +8,10 @@ App({
 
     // 设置页面宽高
     let info = wx.getSystemInfoSync();
-
+    let menuInfo = wx.getMenuButtonBoundingClientRect();
     this.globalData.statusBarHeight = info.statusBarHeight;
-    this.globalData.toolbarHeight = info.statusBarHeight * 2 + 3;
-    this.globalData.windowHeight = info.windowHeight - (info.statusBarHeight * 3 + 3);
+    this.globalData.toolbarHeight = menuInfo.bottom + 6;
+    this.globalData.windowHeight = info.windowHeight - this.globalData.toolbarHeight;
     this.globalData.totalHeight = info.windowHeight;
 
     // 登录

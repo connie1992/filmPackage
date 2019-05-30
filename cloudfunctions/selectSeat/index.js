@@ -4,6 +4,7 @@ const cloud = require('wx-server-sdk')
 cloud.init();
 
 const db = cloud.database();
+const _ = db.command;
 
 const LOCK = "lock";
 
@@ -56,7 +57,7 @@ function lockLoop() {
   });
 }
 
-// 获取值
+// redis获取座位锁定状态
 function getValue(key) {
   return new Promise((resolve, reject) => {
     console.log(`---查询锁定状态：${key}------`);
@@ -76,7 +77,7 @@ function getValue(key) {
   });
 }
 
-// 设置值
+// redis锁定座位
 function setValue(key) {
   return new Promise((resolve, reject) => {
     client.set(key, "1", function(err, reply) {
@@ -90,7 +91,7 @@ function setValue(key) {
   });
 }
 
-// 删除值
+// redis删除值，释放座位
 function delKey(key) {
   return new Promise(resolve => {
     client.del(key, function(err, reply) {
@@ -121,7 +122,7 @@ async function lockSeat(ids) {
       console.log('锁定座位失败了！');
       return e;
     });
-    if (setStatus != FAIL && setStatus != ERROR) {
+    if (setStatus == ERROR) {
       // 如果锁定座位失败，则需要回滚，删除已经设置的key
       let delTasks = ids.map(id => delKey(id));
       Promise.all(delTasks);
@@ -133,6 +134,7 @@ async function lockSeat(ids) {
 }
 
 function getSeatPromise(info, index, nickName, time, movieTimeId) {
+ 
   return db.collection('seat_map').where({
     id: _.in(info.ids)
   }).update({
@@ -170,7 +172,7 @@ function getPhonePromise(info, index, movieTimeId) {
 async function dbSet(selectInfo, nickName, time, movieTimeId) {
   let _ = db.command;
   // 更新座位情况
-  let tasks = selectInfo.reduce((tasks, item, index) => {
+  let seatTasks = selectInfo.reduce((tasks, item, index) => {
     const promise = getSeatPromise(item, index, nickName, time, movieTimeId );
     tasks.push(promise);
     return tasks;
@@ -179,8 +181,9 @@ async function dbSet(selectInfo, nickName, time, movieTimeId) {
   let phoneTasks = selectInfo.reduce((tasks, item, index) => {
     const promise = getPhonePromise(item, index, movieTimeId);
     tasks.push(promise);
+    return tasks
   }, []);
-  return await Promise.all(tasks.concat(phoneTasks));
+  return await Promise.all(seatTasks.concat(phoneTasks));
 }
 
 function loopSetSeat(selectInfo, res, nickName, time, movieTimeId) {
@@ -188,7 +191,7 @@ function loopSetSeat(selectInfo, res, nickName, time, movieTimeId) {
   res.forEach(item => {
     if (item.index && item.type) {
       // 失败的任务
-      const promise = null;
+      let promise = null;
       const info = selectInfo[item.index];
       if (item.type == "seat") {
         promise = getSeatPromise(info, item.index, nickName, time, movieTimeId);
@@ -236,14 +239,16 @@ exports.main = async(event, context) => {
   // success = true;
 
   delKey(LOCK);
-  if (result == SUCCESS) {
+  if (result != ERROR && result != FAIL) {
     // 执行数据库操作
     let res = await dbSet(selectInfo, nickName, time, movieTimeId);
     while(true) {
       let tasks = loopSetSeat(selectInfo, res, nickName, time, movieTimeId);
       if (tasks.length == 0) {
+        console.log("数据库更新成功！");
         break;
       } else {
+        console.log('部分数据库请求没有执行，重新执行……');
         res = await Promise.all(tasks);
       }
     }

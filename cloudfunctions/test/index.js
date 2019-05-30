@@ -29,7 +29,7 @@ function loopSet(res) {
 // 云函数入口函数
 exports.main = async(event, context) => {
   let tasks = [];
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 1; i++) {
     tasks.push(getPromise(i));
   }
   let res = await Promise.all(tasks);

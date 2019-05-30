@@ -354,12 +354,15 @@ Page({
         data: params
       }).then(res => {
         wx.hideLoading();
-        if (res.result) {
+        if (res.result == 1) {
           Toast.success("选座成功");
-          this.setData({selectAmount: 0});
-        } else { 
+          this.setData({selectAmount: 0, phone: []});
+        } else if (res.result == 2) { 
           // 占座失败
-          Toast.fail("选座失败，请重新选择");
+          Toast.fail("选座失败，请重试");
+        } else {
+          // 占座失败
+          Toast.fail("噢！座位被别人抢先一步锁定了！请重新选择");
         }
         _this.refreshSeatSelect();
         _this.setData({selectSeat: []});

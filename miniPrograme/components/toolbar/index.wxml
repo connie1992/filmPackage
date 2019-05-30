@@ -1,4 +1,4 @@
-<view class="toolbar" style="height: {{toolbarHeight + statusHeight}}px">
+<view class="toolbar" style="height: {{toolbarHeight}}px">
   <!-- <image src="../../images/head.png" style='width:100%;height:{{toolbarHeight + statusHeight}}px'></image> -->
   <view class="tool" wx:if="{{show}}">
     <color-icon url="/images/icon/back.png" size="20" bind:tap="back"></color-icon><text style="font-size:35rpx;color:rgba(255, 255, 255, 0.2)">|</text>
