@@ -267,10 +267,13 @@ Page({
   // 判断选择的座位是否是相连的
   checkSelectSeat() {
     let selectSeat = this.data.selectSeat;
+    selectSeat.forEach(item => {
+      item.check = false;
+    });
     let seatMap = this.data.seatMap;
 
     let isOk = true;
-    for (let i = 0; i < selectSeat.length; i++) {
+    for (let i = 0; i < selectSeat.length && !selectSeat[i].check; i++) {
       let seat = selectSeat[i];
       let start = seat.x;
       let end = seat.x;
@@ -281,7 +284,7 @@ Page({
           if (selectSeat[j].x < start) {
             start = selectSeat[j].x;
           } else if (selectSeat[j].x > end) {
-            end = selectSeat[j];
+            end = selectSeat[j].x;
           }
           count ++;
         }
@@ -302,7 +305,7 @@ Page({
           break;
         }
       }
-      selectEnd = selectEnd == -1 ? selectStart : -1;
+      selectEnd = selectEnd == -1 ? selectStart : selectEnd;
       if (selectStart == -1 && selectEnd == -1) {
         // 这一行还没有人选择
         isOk = (count - 1) == (end - start);
