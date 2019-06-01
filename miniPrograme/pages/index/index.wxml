@@ -4,8 +4,9 @@
   <view class="container" style='padding: 10px {{padding}}px;z-index:1000;background-color:rgba(255,255,255,0.7)'>
     <!-- 电影名称、时间、电影院 -->
     <view class='movieInfo'>
-      <view class="movieName">人生无限公司</view>
-      <view class='movieTime'>5月26日 12:30 英皇电影城（东海缤纷店）</view>
+      <view class="movieName">{{movieInfo.movie}}</view>
+      <view class='movieTime'>{{movieInfo.time ? (movieInfo.time + ' （' +  movieInfo.type + '）') : ''}}</view>
+      <view class='movieTime'>{{movieInfo.theater }}</view>
     </view>
     <!-- 座位区域 -->
     <movable-area class="area" scale-area="{{false}}" style="width: 100%; height: {{areaHeight}}px">

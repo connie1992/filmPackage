@@ -17,6 +17,7 @@ Page({
    * 页面的初始数据
    */
   data: {
+    movieInfo: {time: '', movie: '', theater: '', type: ''},
     // 用于计算排号位置
     scale: 1,
     top: 0,
@@ -169,30 +170,37 @@ Page({
       } else {
         let _this = this;
         console.log(`----${this.data.newPhone} 发送验证码-----`);
-        zhenzisms.client.sendCode(function (res) {
-          // 发送成功
+         // 发送成功
+         let count = 30;
+         _this.setData({
+          smsDisabled: true,
+          smsBtnText: `${count--}秒重发`
+        });
+        
+        interval = setInterval(() => {
           _this.setData({
-            smsDisabled: true
+            smsBtnText: `${count--}秒重发`
           });
-          count = 30;
-          interval = setInterval(() => {
+          if (count == 0) {
             _this.setData({
-              smsBtnText: `${count--}秒`
+              smsDisabled: false,
+              smsBtnText: '发送验证码'
             });
-            if (count == 0) {
-              _this.setData({
-                smsDisabled: false,
-                smsBtnText: '发送验证码'
-              });
-              clearInterval(interval);
-            }
-          }, 1000);
+            clearInterval(interval);
+          }
+        }, 1000);
+        zhenzisms.client.sendCode(function (res) {
         }, this.data.newPhone, '小五提示您~ 验证码为：{code}', '', 600, 4);
       }
     }
   },
   // 校验手机号和验证码对不对
   confirm() {
+    // 判断该手机号是否添加过
+    if(this.data.phone.find(el => el.text == this.data.newPhone)) {
+      this.setData({phoneErrorMsg: "该手机号已添加，请勿重复"});
+      return ;
+    }
     if (this.data.sms == '') {
       this.setData({
         smsErrorMsg: '请输入验证码'
@@ -233,7 +241,8 @@ Page({
         phoneArr.push({
           index: phoneArr.length,
           text: _this.data.newPhone,
-          amount: sumAmount
+          amount: sumAmount,
+          sms: this.data.sms
         });
         _this.setData({ show: false, phone: phoneArr, selectAmount: _this.data.selectAmount + sumAmount });
         Toast(`该手机号可以选座数量为：${sumAmount}个`);
@@ -273,7 +282,11 @@ Page({
     let seatMap = this.data.seatMap;
 
     let isOk = true;
-    for (let i = 0; i < selectSeat.length && !selectSeat[i].check; i++) {
+    for (let i = 0; i < selectSeat.length; i++) {
+      if (selectSeat[i].check) {
+        continue ;
+      }
+      console.log('-----start:' + i);
       let seat = selectSeat[i];
       let start = seat.x;
       let end = seat.x;
@@ -333,6 +346,8 @@ Page({
       Toast.fail("请先添加报名手机号码");
     } else if (selectSeat.length < this.data.selectAmount) {
       Toast.fail(`您可选择${this.data.selectAmount}个座位，目前只选择了${selectSeat.length}个`);
+    } else if (selectSeat.length > this.data.selectAmount) {
+      Toast.fail(`您只能选择${this.data.selectAmount}个座位，目前选择了${selectSeat.length}个`);
     } else {
       if (!this.checkSelectSeat()) {
         Toast.fail("请选择相连座位");
@@ -347,29 +362,29 @@ Page({
           ids.push(selectSeat[i].id);
         }
         index += item.amount;
-        return {phone: item.text, ids};
+        return {phone: item.text, ids, sms: item.sms};
       });
       let params = { nickName: userInfo.nickName, time: formatTime(new Date()), selectInfo};
-      wx.showLoading();
-      let _this = this;
-      wx.cloud.callFunction({
-        name: 'selectSeat',
-        data: params
-      }).then(res => {
-        wx.hideLoading();
-        if (res.result == 1) {
-          Toast.success("选座成功");
-          this.setData({selectAmount: 0, phone: []});
-        } else if (res.result == 2) { 
-          // 占座失败
-          Toast.fail("选座失败，请重试");
-        } else {
-          // 占座失败
-          Toast.fail("噢！座位被别人抢先一步锁定了！请重新选择");
-        }
-        _this.refreshSeatSelect();
-        _this.setData({selectSeat: []});
-      });
+      // wx.showLoading();
+      // let _this = this;
+      // wx.cloud.callFunction({
+      //   name: 'selectSeat',
+      //   data: params
+      // }).then(res => {
+      //   wx.hideLoading();
+      //   if (res.result == 1) {
+      //     Toast.success("选座成功");
+      //     this.setData({selectAmount: 0, phone: []});
+      //   } else if (res.result == 2) { 
+      //     // 占座失败
+      //     Toast.fail("选座失败，请重试");
+      //   } else {
+      //     // 占座失败
+      //     Toast.fail("噢！座位被别人抢先一步锁定了！请重新选择");
+      //   }
+      //   _this.refreshSeatSelect();
+      //   _this.setData({selectSeat: []});
+      // });
     }
   },
   
@@ -386,7 +401,7 @@ Page({
     let res1 = wx.getSystemInfoSync();
     let padding = res1.windowWidth > 400 ? 25 : 20;
     let areaWidth = res1.windowWidth - padding * 2;
-    let areaHeight = res1.windowHeight - app.globalData.statusBarHeight - app.globalData.toolbarHeight - 20 - 60 - 170;
+    let areaHeight = res1.windowHeight - app.globalData.statusBarHeight - app.globalData.toolbarHeight - 20 - 80 - 140;
     if (areaHeight > areaWidth * 1.5) {
       areaHeight = areaWidth * 1.5;
     }
@@ -404,9 +419,10 @@ Page({
       wx.hideLoading();
       // console.log(res);
       // 行列数据
-      let seatParam = res.result.seatParam;
-      let rowCount = seatParam.rowCount;
-      let colCount = seatParam.colCount;
+      let movieInfo = res.result.seatParam;
+      movieInfo.time = movieInfo.time.substring(5, movieInfo.time.length);
+      let rowCount = movieInfo.rowCount;
+      let colCount = movieInfo.colCount;
 
       // 设置每个座位view的宽高
       let seatItemWidth = (areaWidth - 2 * this.data.seatPadding) / colCount;
@@ -439,7 +455,8 @@ Page({
         imageSize,
         seatItemWidth,
         seatItemHeight,
-        padding
+        padding,
+        movieInfo
       });
     });
   },

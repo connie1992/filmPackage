@@ -158,7 +158,8 @@ function getPhonePromise(info, index, movieTimeId) {
     phone: info.phone
   }).update({
     data: {
-      "is_select": 1
+      "is_select": 1,
+      sms: info.sms
     }
   }).catch(e => {
     return {

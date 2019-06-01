@@ -1,7 +1,13 @@
 .wraper .btn {
     position: absolute;
-    bottom: 150rpx;
+    bottom: 200rpx;
     width: 100%;
+}
+
+.wraper .btn .movieSelect {
+    text-align: center;
+    color: white;
+    padding-bottom: 10px;
 }
 
 .wraper .btn .button-hover11 {
