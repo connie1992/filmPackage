@@ -1,3 +1,8 @@
 {
-  "usingComponents": {}
+  "usingComponents": {
+    "van-icon": "../../components/vant/icon/index",
+    "van-popup": "../../components/vant/popup/index",
+    "van-picker": "../../components/vant/picker/index",
+    "color-icon": "../../components/color-icon/index"
+  }
 }

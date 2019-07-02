@@ -10,7 +10,7 @@ wx.cloud.init();
 let count = 30;
 let interval = 0;
 // 电影场次的ID
-const movieTimeId = "5ce615d61b9d07166af30504";
+let movieTimeId = "5ce615d61b9d07166af30504";
 Page({
 
   /**
@@ -112,8 +112,8 @@ Page({
     this.setData({
       smsDisabled: false,
       smsBtnText: '发送验证码',
-      newPhone: '15625264468',
-      sms: '1',
+      newPhone: '',
+      sms: '',
       smsErrorMsg: '',
       phoneErrorMsg: '',
       show: true
@@ -206,8 +206,8 @@ Page({
         smsErrorMsg: '请输入验证码'
       });
     } else {
-      // let result = zhenzisms.client.validateCode(this.data.newPhone, this.data.sms);
-      let result = "ok";
+      let result = zhenzisms.client.validateCode(this.data.newPhone, this.data.sms);
+      // let result = "ok";
       let smsErrorMsg = '';
       if (result == 'ok') {
         this.getSelectSeat();
@@ -261,14 +261,30 @@ Page({
       wx.hideLoading();
       let data = res.result;
       let setData = {};
+      let newIndex = [];
       data.forEach(item => {
+        newIndex.push(item.index);
         // 过滤掉已经是选中状态的座位数据
         if (_this.data.seatMap[item.index].sold != 1) {
-          console.log(item);
           let key = `seatMap[${item.index}].sold`;
           setData[key] = item.sold;
         }
       });
+      // 已经选中的取消选中
+      _this.data.seatMap.forEach(seat => {
+        if (seat.sold == 1 && newIndex.indexOf(seat.index) == -1) {
+          let key = `seatMap[${seat.index}].sold`;
+          setData[key] = 0;
+        }
+      });
+      // 如果已经选择的座位已经被选择，则需要更新
+      let selectSeat = _this.data.selectSeat;
+      for (let i = 0; i < selectSeat.length; i++) {
+        if (newIndex.indexOf(selectSeat[i].index) != -1) {
+          selectSeat.splice(i--, 1);
+        }
+      }
+      setData.selectSeat = selectSeat;
       this.setData(setData);
     });
   },
@@ -365,26 +381,26 @@ Page({
         return {phone: item.text, ids, sms: item.sms};
       });
       let params = { nickName: userInfo.nickName, time: formatTime(new Date()), selectInfo};
-      // wx.showLoading();
-      // let _this = this;
-      // wx.cloud.callFunction({
-      //   name: 'selectSeat',
-      //   data: params
-      // }).then(res => {
-      //   wx.hideLoading();
-      //   if (res.result == 1) {
-      //     Toast.success("选座成功");
-      //     this.setData({selectAmount: 0, phone: []});
-      //   } else if (res.result == 2) { 
-      //     // 占座失败
-      //     Toast.fail("选座失败，请重试");
-      //   } else {
-      //     // 占座失败
-      //     Toast.fail("噢！座位被别人抢先一步锁定了！请重新选择");
-      //   }
-      //   _this.refreshSeatSelect();
-      //   _this.setData({selectSeat: []});
-      // });
+      wx.showLoading();
+      let _this = this;
+      wx.cloud.callFunction({
+        name: 'selectSeat',
+        data: params
+      }).then(res => {
+        wx.hideLoading();
+        if (res.result == 1) {
+          Toast.success("选座成功");
+          this.setData({selectAmount: 0, phone: []});
+        } else if (res.result == 2) { 
+          // 占座失败
+          Toast.fail("选座失败，请重试");
+        } else {
+          // 占座失败
+          Toast.fail("噢！座位被别人抢先一步锁定了！请重新选择");
+        }
+        _this.refreshSeatSelect();
+        // _this.setData({selectSeat: []});
+      });
     }
   },
   
@@ -396,12 +412,14 @@ Page({
     })
   },
   onLoad: function (options) {
+    console.log(this.data);
+    movieTimeId = options.id;
     let _this = this;
     // 选座区域的宽高
     let res1 = wx.getSystemInfoSync();
     let padding = res1.windowWidth > 400 ? 25 : 20;
     let areaWidth = res1.windowWidth - padding * 2;
-    let areaHeight = res1.windowHeight - app.globalData.statusBarHeight - app.globalData.toolbarHeight - 20 - 80 - 140;
+    let areaHeight = res1.windowHeight - app.globalData.statusBarHeight - app.globalData.toolbarHeight - 20 - 70 - 140;
     if (areaHeight > areaWidth * 1.5) {
       areaHeight = areaWidth * 1.5;
     }
@@ -417,9 +435,14 @@ Page({
       data: {movieTimeId}
     }).then(res => {
       wx.hideLoading();
-      // console.log(res);
+      console.log(res);
       // 行列数据
       let movieInfo = res.result.seatParam;
+      if (!(movieInfo.time && movieInfo.colCount && movieInfo.rowCount)) {
+        Toast.fail("请补充完整场次信息！");
+        return ;
+      }
+
       movieInfo.time = movieInfo.time.substring(5, movieInfo.time.length);
       let rowCount = movieInfo.rowCount;
       let colCount = movieInfo.colCount;

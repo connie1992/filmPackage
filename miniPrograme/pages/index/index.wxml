@@ -1,12 +1,12 @@
 <view class="wraper">
   <image src="../../images/party.jpg" style='position:absolute;height:{{totalHeight}}px;width:100%'></image>
-  <nav-bar show="{{false}}" title=""></nav-bar>
+  <nav-bar show="{{true}}" title=""></nav-bar>
   <view class="container" style='padding: 10px {{padding}}px;z-index:1000;background-color:rgba(255,255,255,0.7)'>
     <!-- 电影名称、时间、电影院 -->
     <view class='movieInfo'>
       <view class="movieName">{{movieInfo.movie}}</view>
-      <view class='movieTime'>{{movieInfo.time ? (movieInfo.time + ' （' +  movieInfo.type + '）') : ''}}</view>
-      <view class='movieTime'>{{movieInfo.theater }}</view>
+      <view class='movieTime'><color-icon  right="5" top="3" size="12" url="/pages/index/time.png"></color-icon>{{movieInfo.time ? (movieInfo.time + ' （' +  movieInfo.type + '）') : ''}}</view>
+      <view class='movieTime'><color-icon right="2" top="3" url="/pages/index/location.png"></color-icon>{{movieInfo.theater }}</view>
     </view>
     <!-- 座位区域 -->
     <movable-area class="area" scale-area="{{false}}" style="width: 100%; height: {{areaHeight}}px">

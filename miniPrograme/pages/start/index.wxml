@@ -1,11 +1,13 @@
 <view class="wraper">
-    <image src="../../images/party.jpg" style='position:absolute;height:{{height}}px;width:100%'></image>
-
-    
-    <view class="btn">
-        <view class="movieSelect">
-            5/26 英皇电影城screenX包场
-        </view>
-        <button open-type="getUserInfo" bindgetuserinfo="getUserInfo" style="width:200px" class="button-hover11">然后呢，一起走吧</button>
+  <image src="../../images/party.jpg" style='position:absolute;height:{{height}}px;width:100%'></image>
+  <view class="btn">
+    <view class="movieSelect" bindtap="selectMovieTime">
+      {{value}}
+      <van-icon name="arrow" wx:if="{{value != ''}}" style='margin-top:5px'></van-icon>
     </view>
+    <button open-type="getUserInfo" bindgetuserinfo="getUserInfo" style="width:200px" class="button-hover11">然后呢，一起走吧</button>
+  </view>
+  <van-popup show="{{ show }}" position="bottom" close-on-click-overlay="{{false}}" >
+    <van-picker show-toolbar title="选择场次" columns="{{ columns }}" bind:cancel="onCancel" bind:confirm="onConfirm"/>
+  </van-popup>
 </view>

@@ -1,7 +1,8 @@
 {
   "pages": [
-    "pages/start/index",
     "pages/index/index",
+    "pages/start/index",
+    
     "pages/auth/index"
   ],
   "window": {

@@ -3,7 +3,7 @@
   display: flex;
   align-content: space-around;
   flex-wrap: wrap;
-  height: 80px;
+  height: 70px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -17,6 +17,7 @@
   font-size: 13px;
   color: #5B5B5B;
   width: 100%;
+  display: flex;
 }
 
 .number {

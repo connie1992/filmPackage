@@ -5,9 +5,12 @@
 }
 
 .wraper .btn .movieSelect {
-    text-align: center;
-    color: white;
+    color: #EEE9E9;
     padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
 }
 
 .wraper .btn .button-hover11 {
