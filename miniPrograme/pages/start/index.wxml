@@ -1,5 +1,6 @@
 <view class="wraper">
   <image src="../../images/party.jpg" style='position:absolute;height:{{height}}px;width:100%'></image>
+  
   <view class="btn">
     <view class="movieSelect" bindtap="selectMovieTime">
       {{value}}

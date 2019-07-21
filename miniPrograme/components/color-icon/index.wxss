@@ -1,3 +1,4 @@
+@import '../../iconfont/iconfont.wxss';
 .icon-view {
   display: flex;
   flex-direction: column;

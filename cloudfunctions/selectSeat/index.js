@@ -20,8 +20,8 @@ const redis = require('redis');
 // const client = redis.createClient(18868, 'redis-18868.c1.asia-northeast1-1.gce.cloud.redislabs.com', {
 //   password: "Chg85857187."
 // });
-const client = redis.createClient(6379, '106.52.125.131', {
-  password: "12345"
+const client = redis.createClient(6379, '203.195.136.124', {
+  password: "chgyoo"
 });
 
 // 尝试锁定

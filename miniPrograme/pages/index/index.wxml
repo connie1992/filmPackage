@@ -5,30 +5,33 @@
     <!-- 电影名称、时间、电影院 -->
     <view class='movieInfo'>
       <view class="movieName">{{movieInfo.movie}}</view>
-      <view class='movieTime'><color-icon  right="5" top="3" size="12" url="/pages/index/time.png"></color-icon>{{movieInfo.time ? (movieInfo.time + ' （' +  movieInfo.type + '）') : ''}}</view>
-      <view class='movieTime'><color-icon right="2" top="3" url="/pages/index/location.png"></color-icon>{{movieInfo.theater }}</view>
+      <view class='movieTime'>
+      <color-icon name='time' size="12" top="3" right="5"></color-icon>
+      {{movieInfo.time ? (movieInfo.time + ' （' +  movieInfo.type + '）') : ''}}</view>
+      <view class='movieTime'>
+        <color-icon name='location' size="14" top="3" right="3"></color-icon>{{movieInfo.theater }}</view>
     </view>
     <!-- 座位区域 -->
     <movable-area class="area" scale-area="{{false}}" style="width: 100%; height: {{areaHeight}}px">
+      <view class='rowtip' style="height: {{rowtipHeight}}px;top:{{rowtipTop}}px">1</view>
       <movable-view scale direction="all" scale-min="1" scale-max="3" bind:scale="seatScale" bind:change="seatChange" class='seat'>
-        <view class="item" wx:for="{{seatMap}}" wx:key="id" wx:for-item="seat" style="top:{{seat.y * seatItemHeight}}px;left:{{seat.x * seatItemWidth + seatPadding}}px;width:{{seatItemWidth}}px;height:{{seatItemHeight}}px;">
-          <image src="{{seat.sold == 0 ? availableUrl : (seat.sold == 1 ? soldUrl : selectUrl)}}" style='width:{{imageSize}}px;height:{{imageSize}}px' data-id="{{seat.id}}" data-index="{{seat.index}}" data-x="{{seat.x}}" data-y="{{seat.y}}" data-seat="{{seat.seat}}" data-sold="{{seat.sold}}" bind:tap="select"></image>
-        </view>
+        <color-icon top="{{(seatItemHeight - imageSize)/2}}" left="{{(seatItemWidth - imageSize)/2}}" color="{{seat.sold == 0 ? 'gray' : (seat.sold == 1 ? 'red' : 'green')}}" class="item" name="sofa" size="{{imageSize}}" wx:for="{{seatMap}}" wx:key="id" wx:for-item="seat" 
+        style="top:{{seat.y * seatItemHeight + screenHeight}}px;left:{{seat.x * seatItemWidth + seatPadding}}px;"  data-id="{{seat.id}}" data-index="{{seat.index}}" data-x="{{seat.x}}" data-y="{{seat.y}}" data-seat="{{seat.seat}}" data-sold="{{seat.sold}}" bind:tap="select"></color-icon>
       </movable-view>
     </movable-area>
     <!-- 图例和选座信息 -->
     <view class="footer">
       <view class='legend'>
         <view class='item'>
-          <image src="{{availableUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px;margin-right:5px'></image>
+          <color-icon name="sofa" size="10" right="5"></color-icon>
           可选
         </view>
         <view class='item'>
-          <image src="{{soldUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px;margin-right:5px'></image>
+          <color-icon name="sofa" color="red" size="10" right="5"></color-icon>
           不可选
         </view>
         <view class='item'>
-          <image src="{{selectUrl}}" style='width:{{imageSize}}px;height:{{imageSize}}px;margin-right:5px'></image>
+          <color-icon name="sofa" color="green" size="10" right="5"></color-icon>
           已选
         </view>
       </view>
@@ -38,9 +41,9 @@
           <view style="flex:1;display:flex;justify-content: flex-start;flex-wrap:wrap">
             <view wx:for="{{phone}}" wx:key="index" wx:for-item="item" style="display:flex">
               {{item.text}}
-              <color-icon size="16" url="../../images/delete.png" data-index="{{item.index}}" bind:tap="deletePhone"></color-icon>
+              <color-icon name="delete" data-index="{{item.index}}" bind:tap="deletePhone"></color-icon>
             </view>
-            <color-icon size="18" url="../../images/add-file.png" bind:tap="addPhone"></color-icon>
+            <color-icon name="add-file" size="18" color="#1296db" bind:tap="addPhone"></color-icon>
           </view>
         </view>
         <view style="padding:2px 0">可以选择{{selectAmount}}个座位</view>
@@ -48,7 +51,7 @@
       <view class='selectInfo'>已选：
         <view class="selectSeat" wx:for="{{selectSeat}}" wx:key="id" wx:for-item="item" style="display:flex">
               {{item.seat}}
-              <color-icon size="16" url="../../images/delete.png" data-index="{{item.index}}" data-id="{{item.id}}" data-index="{{item.index}}"  data-sold="{{item.sold}}" bind:tap="select"></color-icon>
+              <color-icon name="delete" size="14" top="2" data-index="{{item.index}}" data-id="{{item.id}}" data-index="{{item.index}}"  data-sold="{{item.sold}}" bind:tap="select"></color-icon>
             </view>
       </view>
       <view class='submit'>

@@ -4,8 +4,12 @@ Component({
         type: Number,
         value: 15
       },
-      url: {
+      name: {
         type: String
+      },
+      color: {
+        type: String,
+        value: 'gray'
       },
       top: {
         type: Number,

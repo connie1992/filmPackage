@@ -20,17 +20,13 @@ Page({
     movieInfo: {time: '', movie: '', theater: '', type: ''},
     // 用于计算排号位置
     scale: 1,
-    top: 0,
-    height: 300,
-    originHeight: 300,
     // 座位数据
     seatMap: [],
     seatItemWidth: 0,
     seatItemHeight: 0,
-    // 座位状态图片
-    availableUrl: './sofa.png',
-    selectUrl: './select.png',
-    soldUrl: './sold.png',
+    // 前面屏幕需要留出来的高度
+    screenHeight: 20,
+    // 座位图标信息
     imageSize: 0,
     areaHeight: 0,
     padding: 0,
@@ -49,7 +45,10 @@ Page({
     // 可以选择的座位数量
     selectAmount: 0,
     submitDisabled: true,
-    selectSeat: []
+    selectSeat: [],
+    // 左边表示行数的提示信息
+    rowtipHeight: 0,
+    rowtipTop: 20
   },
   // 座位区域放大缩小时
   seatScale(event) {
@@ -59,8 +58,8 @@ Page({
       scale
     } = event.detail;
     this.setData({
-      height: this.data.originHeight * scale,
-      top: y
+      rowtipHeight: this.data.areaHeight * scale,
+      rowtipTop: y + this.data.screenHeight
     });
   },
   // 座位区域移动时，手指滑动
@@ -71,7 +70,7 @@ Page({
       scale
     } = event.detail;
     this.setData({
-      top: y
+      rowtipTop: y + this.data.screenHeight
     });
   },
   // 选中座位
@@ -206,8 +205,8 @@ Page({
         smsErrorMsg: '请输入验证码'
       });
     } else {
-      let result = zhenzisms.client.validateCode(this.data.newPhone, this.data.sms);
-      // let result = "ok";
+      // let result = zhenzisms.client.validateCode(this.data.newPhone, this.data.sms);
+      let result = "ok";
       let smsErrorMsg = '';
       if (result == 'ok') {
         this.getSelectSeat();
@@ -383,6 +382,7 @@ Page({
       let params = { nickName: userInfo.nickName, time: formatTime(new Date()), selectInfo};
       wx.showLoading();
       let _this = this;
+      console.log(params);
       wx.cloud.callFunction({
         name: 'selectSeat',
         data: params
@@ -396,10 +396,14 @@ Page({
           Toast.fail("选座失败，请重试");
         } else {
           // 占座失败
-          Toast.fail("噢！座位被别人抢先一步锁定了！请重新选择");
+          Toast.fail("噢！座位被别人抢先一步了！请重新选择");
         }
         _this.refreshSeatSelect();
         // _this.setData({selectSeat: []});
+      }, reject => {
+        // console.log(reject);
+        wx.hideLoading();
+        Toast.fail("发生错误，请重试");
       });
     }
   },
@@ -419,13 +423,14 @@ Page({
     let res1 = wx.getSystemInfoSync();
     let padding = res1.windowWidth > 400 ? 25 : 20;
     let areaWidth = res1.windowWidth - padding * 2;
-    let areaHeight = res1.windowHeight - app.globalData.statusBarHeight - app.globalData.toolbarHeight - 20 - 70 - 140;
+    let areaHeight = res1.windowHeight - app.globalData.statusBarHeight - app.globalData.toolbarHeight - 20 - 70 - 140 - this.data.screenHeight;
     if (areaHeight > areaWidth * 1.5) {
       areaHeight = areaWidth * 1.5;
     }
     this.setData({
       padding,
-      areaHeight
+      areaHeight,
+      rowtipHeight: areaHeight
     });
     // // 云函数测试
     wx.showLoading();
@@ -439,7 +444,7 @@ Page({
       // 行列数据
       let movieInfo = res.result.seatParam;
       if (!(movieInfo.time && movieInfo.colCount && movieInfo.rowCount)) {
-        Toast.fail("请补充完整场次信息！");
+        Toast.fail("场次信息不完整！请联系包场负责人处理");
         return ;
       }
 
@@ -450,6 +455,10 @@ Page({
       // 设置每个座位view的宽高
       let seatItemWidth = (areaWidth - 2 * this.data.seatPadding) / colCount;
       let seatItemHeight = areaHeight / rowCount;
+      // 调整一下座位的垂直间距，因为有的时候手机比较长，就不是很好看
+      if (seatItemHeight > seatItemWidth * 1.7) {
+        seatItemHeight = seatItemWidth * 1.7;
+      }
 
       // 沙发图标的大小
       let min = seatItemHeight > seatItemWidth ? seatItemWidth : seatItemHeight;
@@ -461,6 +470,7 @@ Page({
       } else {
         imageSize = min - 10;
       }
+      imageSize = imageSize - res1.windowWidth / 220;
 
       // 座位表
       let seatMap = res.result.seatMap.map(item => {
